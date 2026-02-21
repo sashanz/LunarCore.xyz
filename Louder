@@ -2133,7 +2133,7 @@ do -- god.... i love 3 year old code in v2
         Color = Color3.fromRGB(138, 128, 255),
         ZIndex = 3,
         Transparency = 1,
-        Text = "swimhub.xyz",
+        Text = "LunarCore.xyz",
         Center = true,
         Outline = true,
     })
@@ -2826,6 +2826,113 @@ do -- god... i love 1 year old code in v2
         end
     end))
 end
+local soundGroup = ui.tabs.misc:AddRightGroupbox("Sound Settings")
+
+-- Словарь со звуками
+local sounds = {
+    ["Bameware"] = "rbxassetid://3124331820",
+    ["Bell"] = "rbxassetid://6534947240",
+    ["Bubble"] = "rbxassetid://6534947588",
+    ["Pick"] = "rbxassetid://1347140027",
+    ["Pop"] = "rbxassetid://198598793",
+    ["Rust"] = "rbxassetid://1255040462",
+    ["Skeet"] = "rbxassetid://5633695679",
+    ["Neverlose"] = "rbxassetid://6534948092",
+    ["Minecraft"] = "rbxassetid://4018616850",
+    ["Steve"] = "rbxassetid://4965083997",
+    ["CS:GO"] = "rbxassetid://6937353691",
+    ["TF2 Critical"] = "rbxassetid://296102734",
+    ["Call of Duty"] = "rbxassetid://5952120301",
+    ["Gamesense"] = "rbxassetid://4817809188",
+    ["Among Us"] = "rbxassetid://5700183626",
+    ["Mario"] = "rbxassetid://2815207981",
+    ["Bamboo"] = "rbxassetid://3769434519",
+    ["TF2"] = "rbxassetid://86186041171193",
+}
+
+-- Переменные
+local soundEnabled = false
+local selectedSound = "Bameware"
+local soundVolume = 18.2
+
+-- Функция для получения списка звуков
+local function getSoundList()
+    local list = {}
+    for name, _ in pairs(sounds) do
+        table.insert(list, name)
+    end
+    return list
+end
+
+-- Функция для замены звуков
+local function replaceSounds()
+    if not soundEnabled then return end
+    
+    local soundId = sounds[selectedSound] or "rbxassetid://131961136"
+    
+    for _, obj in pairs(game:GetDescendants()) do
+        if obj:IsA("Sound") and (
+            obj.Name:lower():find("hit") or 
+            obj.Name:lower():find("reg") or 
+            obj.Name:lower():find("damage") or
+            obj.Name:lower():find("impact") or
+            obj.Name:lower():find("bullet")
+        ) then
+            obj.SoundId = soundId
+            obj.Volume = soundVolume / 22
+        end
+    end
+end
+
+-- КНОПКА ВКЛ/ВЫКЛ
+soundGroup:AddToggle('speedhack_enabled', {
+    Text = 'Sound Enabled',
+    Default = false,
+    Callback = function(first)
+        soundEnabled = first
+        if soundEnabled then
+            replaceSounds()
+            -- Запускаем цикл проверки новых звуков
+            spawn(function()
+                while soundEnabled do
+                    wait(0.5)
+                    replaceSounds()
+                end
+            end)
+        end
+    end
+})
+
+-- КНОПКА ВЫБОРА ЗВУКА
+soundGroup:AddDropdown('silentaim_hitreg', {
+    Values = getSoundList(),
+    Default = 1,
+    Multi = false,
+    Text = 'Sound',
+    Tooltip = 'Sound',
+    Callback = function(Value)
+        selectedSound = Value
+        if soundEnabled then
+            replaceSounds()
+        end
+    end
+})
+
+-- КНОПКА ГРОМКОСТИ (КАК В ТВОЕМ ПРИМЕРЕ)
+soundGroup:AddSlider('speedhack_speed', {
+    Text = 'Sound Volume',
+    Default = 18.2,
+    Min = 10,
+    Max = 22,
+    Rounding = 1,
+    Suffix = "sps",
+    Compact = false
+}):OnChanged(function(State)
+    soundVolume = State
+    if soundEnabled then
+        replaceSounds()
+    end
+end)
 do
     local mvb = ui.box.move:AddTab('character')
     local speed_enabled, speed = false, 55
